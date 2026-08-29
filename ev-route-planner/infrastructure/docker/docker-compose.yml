@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    container_name: ev-route-planner-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: evplanner
+      POSTGRES_USER: evplanner
+      POSTGRES_PASSWORD: evplanner
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

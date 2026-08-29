@@ -1,0 +1,745 @@
+]1341;command_started;command=666f72206620696e207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f76656869636c652f56656869636c652e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f73746174696f6e2f4368617267696e6753746174696f6e2e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f73746174696f6e2f4368617267696e67436f6e6e6563746f722e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f6a6f75726e65792f4a6f75726e6579526571756573742e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f6a6f75726e65792f4a6f75726e6579506c616e2e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f6a6f75726e65792f4a6f75726e65794f7074696f6e2e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f696e74656c6c6967656e63652f44656661756c744a6f75726e6579496e74656c6c6967656e6365456e67696e652e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f696e74656c6c6967656e63652f4a6f75726e65794576616c7561746f722e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f696e74656c6c6967656e63652f4a6f75726e657953636f72652e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f696e74656c6c6967656e63652f4a6f75726e6579436f6d70617269736f6e2e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f6368617267696e672f4368617267696e6753747261746567792e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f70726f76696465722f526f7574696e6750726f76696465722e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f70726f76696465722f53746174696f6e50726f76696465722e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f726f7574696e672f526f7574696e6750726f76696465722e6a617661207372632f6d61696e2f6a6176612f636f6d2f6576706c616e6e65722f726f7574696e672f526f757465526573756c742e6a617661207372632f6d61696e2f7265736f75726365732f64622f6d6967726174696f6e2f56315f5f696e697469616c5f736368656d612e73716c207372632f6d61696e2f7265736f75726365732f64622f6d6967726174696f6e2f56325f5f6164645f76656869636c655f636f6e73756d7074696f6e2e73716c
+========== src/main/java/com/evplanner/vehicle/Vehicle.java ==========
+package com.evplanner.vehicle;
+
+import jakarta.persistence.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "vehicle")
+public class Vehicle {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "battery_capacity_kwh", precision = 8, scale = 2)
+    private BigDecimal batteryCapacityKwh;
+
+    @Column(name = "usable_battery_capacity_kwh", precision = 8, scale = 2)
+    private BigDecimal usableBatteryCapacityKwh;
+
+    @Column(name = "range_km", nullable = false, precision = 8, scale = 2)
+    private BigDecimal rangeKm;
+
+    @Column(name = "default_connector_type", length = 50)
+    private String defaultConnectorType;
+
+    @Column(name = "consumption_kwh_per_100km", nullable = false, precision = 8, scale = 2)
+    private BigDecimal consumptionKwhPer100Km;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    protected Vehicle() {
+        // JPA
+    }
+
+    public Vehicle(
+            String name,
+            BigDecimal batteryCapacityKwh,
+            BigDecimal usableBatteryCapacityKwh,
+            BigDecimal rangeKm,
+            BigDecimal consumptionKwhPer100Km,
+            String defaultConnectorType) {
+
+        this.name = name;
+        this.batteryCapacityKwh = batteryCapacityKwh;
+        this.usableBatteryCapacityKwh = usableBatteryCapacityKwh;
+        this.rangeKm = rangeKm;
+        this.consumptionKwhPer100Km = consumptionKwhPer100Km;
+        this.defaultConnectorType = defaultConnectorType;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // Getters and setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public BigDecimal getBatteryCapacityKwh() {
+        return batteryCapacityKwh;
+    }
+
+    public void setBatteryCapacityKwh(BigDecimal batteryCapacityKwh) {
+        this.batteryCapacityKwh = batteryCapacityKwh;
+    }
+
+    public BigDecimal getUsableBatteryCapacityKwh() {
+        return usableBatteryCapacityKwh;
+    }
+
+    public void setUsableBatteryCapacityKwh(BigDecimal usableBatteryCapacityKwh) {
+        this.usableBatteryCapacityKwh = usableBatteryCapacityKwh;
+    }
+
+    public BigDecimal getRangeKm() {
+        return rangeKm;
+    }
+
+    public void setRangeKm(BigDecimal rangeKm) {
+        this.rangeKm = rangeKm;
+    }
+
+    public BigDecimal getConsumptionKwhPer100Km() {
+        return consumptionKwhPer100Km;
+    }
+
+    public void setConsumptionKwhPer100Km(BigDecimal consumptionKwhPer100Km) {
+        this.consumptionKwhPer100Km = consumptionKwhPer100Km;
+    }
+
+    public String getDefaultConnectorType() {
+        return defaultConnectorType;
+    }
+
+    public void setDefaultConnectorType(String defaultConnectorType) {
+        this.defaultConnectorType = defaultConnectorType;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}
+========== src/main/java/com/evplanner/station/ChargingStation.java ==========
+package com.evplanner.station;
+
+import jakarta.persistence.*;
+
+import org.locationtech.jts.geom.Point;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "charging_station")
+public class ChargingStation {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "external_id", length = 150)
+    private String externalId;
+
+    @Column(nullable = false, length = 255)
+    private String name;
+
+    @Column(nullable = false)
+    private Double latitude;
+
+    @Column(nullable = false)
+    private Double longitude;
+
+    @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
+    private Point location;
+
+    @Column(length = 500)
+    private String address;
+
+    @Column(length = 100)
+    private String city;
+
+    @Column(length = 100)
+    private String state;
+
+    @Column(length = 100)
+    private String country;
+
+    @Column(length = 255)
+    private String operator;
+
+    @Column(length = 50)
+    private String status;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    protected ChargingStation() {
+        // JPA
+    }
+
+    public ChargingStation(
+            String externalId,
+            String name,
+            Double latitude,
+            Double longitude,
+            Point location) {
+
+        this.externalId = externalId;
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.location = location;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // Getters and setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Point getLocation() {
+        return location;
+    }
+
+    public void setLocation(Point location) {
+        this.location = location;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}
+========== src/main/java/com/evplanner/station/ChargingConnector.java ==========
+package com.evplanner.station;
+
+import jakarta.persistence.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "charging_connector")
+public class ChargingConnector {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "charging_station_id", nullable = false)
+    private ChargingStation chargingStation;
+
+    @Column(name = "connector_type", nullable = false, length = 50)
+    private String connectorType;
+
+    @Column(name = "power_kw")
+    private BigDecimal powerKw;
+
+    @Column(nullable = false)
+    private Integer quantity = 1;
+
+    @Column(name = "available_count")
+    private Integer availableCount;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    protected ChargingConnector() {
+        // JPA
+    }
+
+    public ChargingConnector(
+            ChargingStation chargingStation,
+            String connectorType,
+            BigDecimal powerKw,
+            Integer quantity,
+            Integer availableCount) {
+
+        this.chargingStation = chargingStation;
+        this.connectorType = connectorType;
+        this.powerKw = powerKw;
+        this.quantity = quantity;
+        this.availableCount = availableCount;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    // Getters and setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public ChargingStation getChargingStation() {
+        return chargingStation;
+    }
+
+    public void setChargingStation(ChargingStation chargingStation) {
+        this.chargingStation = chargingStation;
+    }
+
+    public String getConnectorType() {
+        return connectorType;
+    }
+
+    public void setConnectorType(String connectorType) {
+        this.connectorType = connectorType;
+    }
+
+    public BigDecimal getPowerKw() {
+        return powerKw;
+    }
+
+    public void setPowerKw(BigDecimal powerKw) {
+        this.powerKw = powerKw;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public Integer getAvailableCount() {
+        return availableCount;
+    }
+
+    public void setAvailableCount(Integer availableCount) {
+        this.availableCount = availableCount;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+}
+========== src/main/java/com/evplanner/journey/JourneyRequest.java ==========
+package com.evplanner.journey;
+
+import java.math.BigDecimal;
+
+public record JourneyRequest(
+        GeoPoint origin,
+        GeoPoint destination,
+        Long vehicleId,
+        BigDecimal currentSocPercent,
+        BigDecimal minimumArrivalSocPercent
+) {
+}
+========== src/main/java/com/evplanner/journey/JourneyPlan.java ==========
+package com.evplanner.journey;
+
+import java.util.List;
+
+public record JourneyPlan(
+        List<JourneyOption> options,
+        JourneyOption recommendedOption
+) {
+}
+========== src/main/java/com/evplanner/journey/JourneyOption.java ==========
+package com.evplanner.journey;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+public record JourneyOption(
+        BigDecimal distanceKm,
+        Integer estimatedDurationMinutes,
+        List<ChargingRecommendation> chargingRecommendations,
+        BigDecimal minimumSocPercent,
+        BigDecimal overallScore
+) {
+}
+========== src/main/java/com/evplanner/intelligence/DefaultJourneyIntelligenceEngine.java ==========
+package com.evplanner.intelligence;
+
+import com.evplanner.energy.EnergyCalculationResult;
+import com.evplanner.energy.EnergyConsumptionModel;
+import com.evplanner.journey.JourneyOption;
+import com.evplanner.journey.JourneyPlan;
+import com.evplanner.journey.JourneyRequest;
+import com.evplanner.routing.RouteResult;
+import com.evplanner.routing.RoutingProvider;
+import com.evplanner.vehicle.Vehicle;
+import com.evplanner.vehicle.VehicleRepository;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Service
+public class DefaultJourneyIntelligenceEngine
+        implements JourneyIntelligenceEngine {
+
+    private final RoutingProvider routingProvider;
+    private final VehicleRepository vehicleRepository;
+    private final EnergyConsumptionModel energyConsumptionModel;
+
+    public DefaultJourneyIntelligenceEngine(
+            RoutingProvider routingProvider,
+            VehicleRepository vehicleRepository,
+            EnergyConsumptionModel energyConsumptionModel) {
+
+        this.routingProvider = routingProvider;
+        this.vehicleRepository = vehicleRepository;
+        this.energyConsumptionModel = energyConsumptionModel;
+    }
+
+    @Override
+    public JourneyPlan plan(JourneyRequest request) {
+
+        Vehicle vehicle = vehicleRepository.findById(request.vehicleId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Vehicle not found: " + request.vehicleId()
+                ));
+
+        RouteResult route = routingProvider.calculateRoute(
+                request.origin(),
+                request.destination()
+        );
+
+        EnergyCalculationResult energy = energyConsumptionModel.calculate(
+                vehicle,
+                route.distanceKm(),
+                request.currentSocPercent(),
+                request.minimumArrivalSocPercent()
+        );
+
+        JourneyOption option = new JourneyOption(
+                route.distanceKm(),
+                route.durationMinutes(),
+                List.of(),
+                energy.arrivalSocPercent(),
+                BigDecimal.ZERO
+        );
+
+        return new JourneyPlan(
+                List.of(option),
+                option
+        );
+    }
+}
+========== src/main/java/com/evplanner/intelligence/JourneyEvaluator.java ==========
+
+========== src/main/java/com/evplanner/intelligence/JourneyScore.java ==========
+
+========== src/main/java/com/evplanner/intelligence/JourneyComparison.java ==========
+
+========== src/main/java/com/evplanner/charging/ChargingStrategy.java ==========
+
+========== src/main/java/com/evplanner/provider/RoutingProvider.java ==========
+
+========== src/main/java/com/evplanner/provider/StationProvider.java ==========
+
+========== src/main/java/com/evplanner/routing/RoutingProvider.java ==========
+package com.evplanner.routing;
+
+import com.evplanner.journey.GeoPoint;
+
+public interface RoutingProvider {
+
+    RouteResult calculateRoute(
+            GeoPoint origin,
+            GeoPoint destination
+    );
+}
+========== src/main/java/com/evplanner/routing/RouteResult.java ==========
+package com.evplanner.routing;
+
+import java.math.BigDecimal;
+
+public record RouteResult(
+        BigDecimal distanceKm,
+        Integer durationMinutes
+) {
+}
+========== src/main/resources/db/migration/V1__initial_schema.sql ==========
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+CREATE TABLE vehicle (
+                         id BIGSERIAL PRIMARY KEY,
+                         name VARCHAR(100) NOT NULL,
+                         battery_capacity_kwh NUMERIC(8,2),
+                         usable_battery_capacity_kwh NUMERIC(8,2),
+                         range_km NUMERIC(8,2) NOT NULL,
+                         default_connector_type VARCHAR(50),
+                         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE charging_station (
+                                  id BIGSERIAL PRIMARY KEY,
+
+                                  external_id VARCHAR(150),
+                                  name VARCHAR(255) NOT NULL,
+
+                                  latitude NUMERIC(10,7) NOT NULL,
+                                  longitude NUMERIC(10,7) NOT NULL,
+
+                                  location GEOMETRY(Point, 4326) NOT NULL,
+
+                                  address VARCHAR(500),
+                                  city VARCHAR(100),
+                                  state VARCHAR(100),
+                                  country VARCHAR(100),
+
+                                  operator VARCHAR(255),
+
+                                  status VARCHAR(50),
+
+                                  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_charging_station_location
+    ON charging_station
+    USING GIST (location);
+
+CREATE TABLE charging_connector (
+                                    id BIGSERIAL PRIMARY KEY,
+
+                                    charging_station_id BIGINT NOT NULL,
+
+                                    connector_type VARCHAR(50) NOT NULL,
+                                    power_kw NUMERIC(8,2),
+
+                                    quantity INTEGER NOT NULL DEFAULT 1,
+                                    available_count INTEGER,
+
+                                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                                    CONSTRAINT fk_connector_station
+                                        FOREIGN KEY (charging_station_id)
+                                            REFERENCES charging_station(id)
+                                            ON DELETE CASCADE
+);
+
+CREATE INDEX idx_connector_station
+    ON charging_connector(charging_station_id);
+
+CREATE TABLE route_request (
+                               id BIGSERIAL PRIMARY KEY,
+
+                               source_latitude NUMERIC(10,7) NOT NULL,
+                               source_longitude NUMERIC(10,7) NOT NULL,
+
+                               destination_latitude NUMERIC(10,7) NOT NULL,
+                               destination_longitude NUMERIC(10,7) NOT NULL,
+
+                               vehicle_range_km NUMERIC(8,2) NOT NULL,
+                               battery_percentage NUMERIC(5,2) NOT NULL,
+                               reserve_percentage NUMERIC(5,2) NOT NULL,
+
+                               requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE route_option (
+                              id BIGSERIAL PRIMARY KEY,
+
+                              route_request_id BIGINT NOT NULL,
+
+                              provider VARCHAR(100),
+
+                              distance_km NUMERIC(10,2),
+                              duration_minutes INTEGER,
+
+                              estimated_energy_kwh NUMERIC(10,2),
+
+                              total_charging_time_minutes INTEGER,
+
+                              score NUMERIC(8,2),
+
+                              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                              CONSTRAINT fk_route_option_request
+                                  FOREIGN KEY (route_request_id)
+                                      REFERENCES route_request(id)
+                                      ON DELETE CASCADE
+);
+
+CREATE INDEX idx_route_option_request
+    ON route_option(route_request_id);
+
+CREATE TABLE charging_stop (
+                               id BIGSERIAL PRIMARY KEY,
+
+                               route_option_id BIGINT NOT NULL,
+                               charging_station_id BIGINT NOT NULL,
+
+                               sequence_number INTEGER NOT NULL,
+
+                               arrival_soc NUMERIC(5,2),
+                               departure_soc NUMERIC(5,2),
+
+                               energy_added_kwh NUMERIC(10,2),
+
+                               charging_time_minutes INTEGER,
+
+                               CONSTRAINT fk_stop_route
+                                   FOREIGN KEY (route_option_id)
+                                       REFERENCES route_option(id)
+                                       ON DELETE CASCADE,
+
+                               CONSTRAINT fk_stop_station
+                                   FOREIGN KEY (charging_station_id)
+                                       REFERENCES charging_station(id)
+);
+
+CREATE INDEX idx_charging_stop_route
+    ON charging_stop(route_option_id);
+
+CREATE INDEX idx_charging_stop_station
+    ON charging_stop(charging_station_id);
+
+
+========== src/main/resources/db/migration/V2__add_vehicle_consumption.sql ==========
+ALTER TABLE vehicle
+    ADD COLUMN consumption_kwh_per_100km NUMERIC(8,2);
