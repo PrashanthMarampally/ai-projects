@@ -4,6 +4,7 @@ import com.evplanner.routing.RouteGeometryService;
 import com.evplanner.routing.RouteResult;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,23 +17,29 @@ public class RouteStationFinder {
     public RouteStationFinder(
             ChargingStationRepository repository,
             RouteGeometryService routeGeometryService) {
-
         this.repository = repository;
         this.routeGeometryService = routeGeometryService;
     }
 
+    @Transactional(readOnly = true)
     public List<ChargingStation> findNearRoute(
             RouteResult route,
             double corridorRadiusKm) {
 
         Geometry routeGeometry =
-                routeGeometryService.toLineString(
-                        route.geometry()
-                );
+                routeGeometryService.toLineString(route.geometry());
 
-        return repository.findNearRoute(
-                routeGeometry,
-                corridorRadiusKm * 1_000
-        );
+        List<ChargingStation> stations =
+                repository.findNearRoute(
+                        routeGeometry,
+                        corridorRadiusKm * 1_000);
+
+        /*
+         * Initialize the lazy connectors collection while
+         * the Hibernate session is still active.
+         */
+        stations.forEach(station -> station.getConnectors().size());
+
+        return stations;
     }
 }

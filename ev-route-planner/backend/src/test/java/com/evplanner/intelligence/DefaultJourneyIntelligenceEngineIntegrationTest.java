@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import com.evplanner.journey.GeoPoint;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -72,11 +71,11 @@ class DefaultJourneyIntelligenceEngineIntegrationTest {
                         BigDecimal.valueOf(15.1783),
                         BigDecimal.valueOf(78.04065));
 
-        when(routingProvider.calculateRoute(
+        when(routingProvider.calculateRoutes(
                 any(),
                 any()))
                 .thenReturn(
-                        new RouteResult(
+                        List.of(new RouteResult(
                                 BigDecimal.valueOf(200),
                                 150,
                                 List.of(
@@ -84,7 +83,7 @@ class DefaultJourneyIntelligenceEngineIntegrationTest {
                                         midpoint,
                                         destination
                                 )
-                        ));
+                        )));
         RouteStationFinder routeStationFinder =
                 mock(RouteStationFinder.class);
 
@@ -146,7 +145,7 @@ class DefaultJourneyIntelligenceEngineIntegrationTest {
         );
 
         verify(routingProvider)
-                .calculateRoute(
+                .calculateRoutes(
                         request.origin(),
                         request.destination()
                 );

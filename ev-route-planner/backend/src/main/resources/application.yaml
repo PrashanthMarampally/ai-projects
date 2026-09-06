@@ -18,3 +18,13 @@ spring:
 
 server:
   port: 8080
+# Routing provider: fake (default) or google
+# Keep the real key outside source control.
+evplanner:
+  routing:
+    station-corridor-radius-km: 50
+    provider: ${EVPLANNER_ROUTING_PROVIDER:fake}
+    google:
+      api-key: ${GOOGLE_MAPS_API_KEY:}
+      base-url: https://routes.googleapis.com
+      field-mask: routes.distanceMeters,routes.duration,routes.polyline.geoJsonLinestring

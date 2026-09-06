@@ -51,8 +51,8 @@ public class StationReachabilityService {
         return new ChargingStationCandidate(
                 station,
                 distanceFromOriginKm,
+                BigDecimal.ZERO,
                 arrivalSoc,
-                requiredCharge,
                 reachable
         );
     }
