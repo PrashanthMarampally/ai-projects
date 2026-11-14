@@ -21,6 +21,9 @@ target/
 .DS_Store
 Thumbs.db
 
+# Node
+node_modules/
+
 # Environment / secrets
 .env
 .env.*
