@@ -269,7 +269,8 @@ public class DefaultJourneyIntelligenceEngine
                 route.durationMinutes(),
                 chargingStops,
                 plannedArrivalSoc,
-                score);
+                score,
+                route.geometry());
     }
 
     /**

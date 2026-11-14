@@ -34,14 +34,17 @@ class JourneyControllerTest {
                 BigDecimal.valueOf(65.20),
                 BigDecimal.valueOf(28.40),
                 BigDecimal.valueOf(60),
-                29);
+                29,
+                null,
+                null);
 
         JourneyOption option = new JourneyOption(
                 BigDecimal.valueOf(320),
                 240,
                 List.of(stop),
                 BigDecimal.valueOf(18),
-                BigDecimal.valueOf(80)
+                BigDecimal.valueOf(80),
+                null
         );
         JourneyPlan plan = new JourneyPlan(List.of(option), option);
         when(engine.plan(any(JourneyRequest.class))).thenReturn(plan);

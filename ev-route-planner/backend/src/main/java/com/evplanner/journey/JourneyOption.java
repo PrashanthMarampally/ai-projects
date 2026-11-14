@@ -10,7 +10,8 @@ public record JourneyOption(
         Integer estimatedDurationMinutes,
         List<ChargingStopPlan> chargingStops,
         BigDecimal minimumSocPercent,
-        BigDecimal overallScore
+        BigDecimal overallScore,
+        List<GeoPoint> routeGeometry
 ) {
     /** Backward-compatible view for existing callers. */
     @JsonIgnore

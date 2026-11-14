@@ -12,5 +12,7 @@ public record ChargingStopPlan(
         BigDecimal targetSocPercent,
         BigDecimal energyToAddKwh,
         BigDecimal chargingPowerKw,
-        Integer estimatedChargingMinutes
+        Integer estimatedChargingMinutes,
+        BigDecimal latitude,
+        BigDecimal longitude
 ) {}

@@ -277,7 +277,9 @@ public class MultiStopChargingPlanner {
                                 .setScale(
                                         0,
                                         RoundingMode.CEILING)
-                                .intValue()));
+                                .intValue(),
+                        currentStation.station().getLatitude(),
+                        currentStation.station().getLongitude()));
 
         return result;
     }
