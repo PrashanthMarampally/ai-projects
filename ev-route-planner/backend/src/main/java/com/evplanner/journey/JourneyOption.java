@@ -1,5 +1,6 @@
 package com.evplanner.journey;
 
+import com.evplanner.intelligence.JourneyScore;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
@@ -11,7 +12,8 @@ public record JourneyOption(
         List<ChargingStopPlan> chargingStops,
         BigDecimal minimumSocPercent,
         BigDecimal overallScore,
-        List<GeoPoint> routeGeometry
+        List<GeoPoint> routeGeometry,
+        JourneyScore scoreBreakdown
 ) {
     /** Backward-compatible view for existing callers. */
     @JsonIgnore

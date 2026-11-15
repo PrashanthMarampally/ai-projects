@@ -1,3 +1,8 @@
+function fmt(val) {
+  if (val == null) return '--'
+  return `${Number(val).toFixed(0)}/100`
+}
+
 function fmtDuration(minutes) {
   if (!minutes && minutes !== 0) return '--'
   const h = Math.floor(minutes / 60)
@@ -43,6 +48,23 @@ export default function JourneyResults({ plan, selectedIdx, onSelect }) {
             <div className="option-soc">
               Arrival SOC: <strong>{opt.minimumSocPercent}%</strong>
             </div>
+
+            {opt.scoreBreakdown && (
+              <div className="score-breakdown">
+                <span className="score-pill" data-tip="Drive time vs total journey time">
+                  Time {fmt(opt.scoreBreakdown.timeEfficiency)}
+                </span>
+                <span className="score-pill" data-tip="SOC margin above requested minimum">
+                  Buffer {fmt(opt.scoreBreakdown.arrivalBuffer)}
+                </span>
+                <span className="score-pill" data-tip="Fewer stops and faster chargers score higher">
+                  Charging {fmt(opt.scoreBreakdown.chargingExperience)}
+                </span>
+                <span className="score-pill" data-tip="Minimum SOC reached at any point">
+                  Safety {fmt(opt.scoreBreakdown.safety)}
+                </span>
+              </div>
+            )}
 
             {stops > 0 && (
               <div className="stop-list">

@@ -110,15 +110,17 @@ class DefaultJourneyIntelligenceEngineTest {
         assertNotNull(plan);
         assertNotNull(plan.recommendedOption());
 
+        // Shorter route (250km/340min) arrives at ~22.5% SOC vs 275km route at ~16.25%,
+        // so it scores higher on buffer and safety under the weighted scoring model.
         assertEquals(
                 0,
                 plan.recommendedOption()
                         .distanceKm()
-                        .compareTo(BigDecimal.valueOf(275))
+                        .compareTo(BigDecimal.valueOf(250))
         );
 
         assertEquals(
-                330,
+                340,
                 plan.recommendedOption()
                         .estimatedDurationMinutes()
         );
@@ -127,7 +129,7 @@ class DefaultJourneyIntelligenceEngineTest {
                 0,
                 plan.recommendedOption()
                         .minimumSocPercent()
-                        .compareTo(BigDecimal.valueOf(16.25))
+                        .compareTo(BigDecimal.valueOf(22.5))
         );
     }
     @Test
@@ -185,9 +187,11 @@ class DefaultJourneyIntelligenceEngineTest {
 
         JourneyPlan plan = engine.plan(request);
 
+        // slowerRoute (280km/360min) arrives at ~30% SOC vs fasterRoute (300km/300min)
+        // at ~25% SOC, so it scores higher on buffer and safety.
         assertEquals(2, plan.options().size());
-        assertEquals(300, plan.recommendedOption().distanceKm().intValue());
-        assertEquals(300, plan.recommendedOption().estimatedDurationMinutes());
+        assertEquals(280, plan.recommendedOption().distanceKm().intValue());
+        assertEquals(360, plan.recommendedOption().estimatedDurationMinutes());
         assertEquals(plan.options().get(0), plan.recommendedOption());
     }
 

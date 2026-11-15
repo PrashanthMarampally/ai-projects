@@ -3,7 +3,6 @@ package com.evplanner.intelligence;
 import com.evplanner.charging.ChargingCandidateEvaluator;
 import com.evplanner.charging.ChargingDecision;
 import com.evplanner.charging.ChargingStrategy;
-import com.evplanner.charging.ChargingStopCandidate;
 import com.evplanner.charging.MultiStopChargingPlan;
 import com.evplanner.charging.MultiStopChargingPlanner;
 import com.evplanner.energy.EnergyCalculationResult;
@@ -40,6 +39,7 @@ public class DefaultJourneyIntelligenceEngine
     private final ChargingStrategy chargingStrategy;
     private final RouteStationFinder routeStationFinder;
     private final MultiStopChargingPlanner multiStopChargingPlanner;
+    private final JourneyEvaluator journeyEvaluator;
 
     /**
      * Backward-compatible constructor primarily useful for unit tests.
@@ -66,7 +66,8 @@ public class DefaultJourneyIntelligenceEngine
                         energyConsumptionModel,
                         new com.evplanner.charging.ChargingStationEligibilityService(),
                         new com.evplanner.routing.RouteStationPositionCalculator()),
-                DEFAULT_STATION_CORRIDOR_RADIUS_KM);
+                DEFAULT_STATION_CORRIDOR_RADIUS_KM,
+                new JourneyEvaluator());
     }
 
     /**
@@ -90,7 +91,8 @@ public class DefaultJourneyIntelligenceEngine
                 routeStationFinder,
                 chargingCandidateEvaluator,
                 multiStopChargingPlanner,
-                DEFAULT_STATION_CORRIDOR_RADIUS_KM);
+                DEFAULT_STATION_CORRIDOR_RADIUS_KM,
+                new JourneyEvaluator());
     }
 
     /**
@@ -110,7 +112,8 @@ public class DefaultJourneyIntelligenceEngine
             ChargingCandidateEvaluator chargingCandidateEvaluator,
             MultiStopChargingPlanner multiStopChargingPlanner,
             @Value("${evplanner.routing.station-corridor-radius-km:50.0}")
-            double stationCorridorRadiusKm) {
+            double stationCorridorRadiusKm,
+            JourneyEvaluator journeyEvaluator) {
 
         if (stationCorridorRadiusKm <= 0) {
             throw new IllegalArgumentException(
@@ -124,6 +127,7 @@ public class DefaultJourneyIntelligenceEngine
         this.chargingStrategy = chargingStrategy;
         this.routeStationFinder = routeStationFinder;
         this.multiStopChargingPlanner = multiStopChargingPlanner;
+        this.journeyEvaluator = journeyEvaluator;
     }
 
     @Override
@@ -203,9 +207,7 @@ public class DefaultJourneyIntelligenceEngine
 
             return buildJourneyOption(
                     route,
-                    energy,
-                    chargingDecision,
-                    List.of(),
+                    request,
                     null,
                     energy.arrivalSocPercent());
         }
@@ -236,18 +238,14 @@ public class DefaultJourneyIntelligenceEngine
 
         return buildJourneyOption(
                 route,
-                energy,
-                chargingDecision,
-                List.of(),
+                request,
                 chargingPlan,
                 plannedArrivalSoc);
     }
 
     private JourneyOption buildJourneyOption(
             RouteResult route,
-            EnergyCalculationResult energy,
-            ChargingDecision chargingDecision,
-            List<ChargingStopCandidate> chargingCandidates,
+            JourneyRequest request,
             MultiStopChargingPlan chargingPlan,
             BigDecimal plannedArrivalSoc) {
 
@@ -256,21 +254,21 @@ public class DefaultJourneyIntelligenceEngine
                         ? chargingPlan.chargingStops()
                         : List.of();
 
-        BigDecimal score =
-                calculateInitialScore(
+        JourneyScore score =
+                journeyEvaluator.evaluate(
                         route,
-                        energy,
-                        chargingDecision,
-                        chargingStops,
-                        chargingPlan);
+                        request,
+                        chargingPlan,
+                        plannedArrivalSoc);
 
         return new JourneyOption(
                 route.distanceKm(),
                 route.durationMinutes(),
                 chargingStops,
                 plannedArrivalSoc,
-                score,
-                route.geometry());
+                score.overall(),
+                route.geometry(),
+                score);
     }
 
     /**
@@ -309,62 +307,6 @@ public class DefaultJourneyIntelligenceEngine
                         BigDecimal.ZERO);
 
         return finalLeg.arrivalSocPercent()
-                .setScale(
-                        2,
-                        RoundingMode.HALF_UP);
-    }
-
-    private BigDecimal calculateInitialScore(
-            RouteResult route,
-            EnergyCalculationResult energy,
-            ChargingDecision chargingDecision,
-            List<ChargingStopPlan> chargingStops,
-            MultiStopChargingPlan chargingPlan) {
-
-        /*
-         * Higher is better.
-         *
-         * Driving time is the primary baseline and estimated charging
-         * time is added when the route requires charging.
-         */
-        BigDecimal totalMinutes =
-                BigDecimal.valueOf(
-                        route.durationMinutes());
-
-        if (chargingDecision.chargingRequired()) {
-
-            int chargingMinutes =
-                    chargingPlan != null
-                            ? chargingPlan.totalChargingMinutes()
-                            .setScale(
-                                    0,
-                                    RoundingMode.CEILING)
-                            .intValue()
-                            : chargingStops.stream()
-                            .map(
-                                    ChargingStopPlan::
-                                            estimatedChargingMinutes)
-                            .filter(
-                                    java.util.Objects::
-                                            nonNull)
-                            .mapToInt(
-                                    Integer::intValue)
-                            .sum();
-
-            totalMinutes =
-                    totalMinutes.add(
-                            BigDecimal.valueOf(
-                                    chargingMinutes));
-        }
-
-        /*
-         * Temporary scoring model.
-         *
-         * This will be replaced later by the full journey scoring model.
-         */
-        return BigDecimal.valueOf(1000)
-                .subtract(totalMinutes)
-                .max(BigDecimal.ZERO)
                 .setScale(
                         2,
                         RoundingMode.HALF_UP);

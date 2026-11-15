@@ -44,6 +44,7 @@ class JourneyControllerTest {
                 List.of(stop),
                 BigDecimal.valueOf(18),
                 BigDecimal.valueOf(80),
+                null,
                 null
         );
         JourneyPlan plan = new JourneyPlan(List.of(option), option);
