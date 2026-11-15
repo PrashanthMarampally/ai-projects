@@ -40,6 +40,14 @@ public class MultiStopChargingPlanner {
     private static final BigDecimal ONE_HUNDRED = BigDecimal.valueOf(100);
     private static final int MAX_STOPS = 4;
 
+    /**
+     * Extra SOC margin added on top of the leg energy + minimum arrival reserve.
+     * Charging to this buffer above the bare minimum gives the vehicle a cushion
+     * for unexpected range losses and produces a non-zero arrival buffer score.
+     */
+    private static final BigDecimal ARRIVAL_BUFFER_SOC_PERCENT =
+            BigDecimal.valueOf(10);
+
     private final EnergyConsumptionModel energyConsumptionModel;
     private final ChargingStationEligibilityService eligibilityService;
     private final RouteStationPositionCalculator positionCalculator;
@@ -375,19 +383,27 @@ public class MultiStopChargingPlanner {
                         .multiply(ONE_HUNDRED);
 
         /*
-         * We need enough SOC at departure to:
-         *
-         * energy required for the leg
-         * +
-         * minimum arrival reserve.
+         * Bare minimum departure SOC needed to cover this leg with the
+         * user's minimum arrival reserve.  If this already exceeds 100 %
+         * the leg is physically impossible regardless of buffer.
          */
-        BigDecimal targetSoc =
+        BigDecimal baseTarget =
                 energyPercent
                         .add(minimumArrivalSocPercent);
 
-        if (targetSoc.compareTo(ONE_HUNDRED) > 0) {
+        if (baseTarget.compareTo(ONE_HUNDRED) > 0) {
             return Transition.unreachable();
         }
+
+        /*
+         * Add a buffer on top so the vehicle arrives above the bare minimum,
+         * capped at a full battery.  This keeps the arrival-buffer score
+         * non-zero and gives the driver a cushion for unexpected range losses.
+         */
+        BigDecimal targetSoc =
+                baseTarget
+                        .add(ARRIVAL_BUFFER_SOC_PERCENT)
+                        .min(ONE_HUNDRED);
 
         /*
          * Amount of SOC that must be added at this station.
