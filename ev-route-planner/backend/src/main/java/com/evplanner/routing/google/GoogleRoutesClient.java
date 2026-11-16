@@ -22,7 +22,6 @@ public class GoogleRoutesClient {
 
     public GoogleRoutesClient(
             ObjectMapper objectMapper,
-            RestClient.Builder restClientBuilder,
             GoogleRoutingProperties properties) {
         this.objectMapper = objectMapper;
         if (properties.apiKey() == null || properties.apiKey().isBlank()) {
@@ -30,7 +29,7 @@ public class GoogleRoutesClient {
         }
         this.apiKey = properties.apiKey();
         this.fieldMask = properties.fieldMask();
-        this.restClient = restClientBuilder
+        this.restClient = RestClient.builder()
                 .baseUrl(properties.baseUrl())
                 .build();
     }

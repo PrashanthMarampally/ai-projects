@@ -14,6 +14,16 @@ const PRESETS = [
     origin: { lat: 28.6139, lng: 77.209 },
     dest: { lat: 27.1767, lng: 78.0081 },
   },
+  {
+    label: 'Delhi \u2192 Jaipur',
+    origin: { lat: 28.6139, lng: 77.209 },
+    dest: { lat: 26.9124, lng: 75.7873 },
+  },
+  {
+    label: 'Blr \u2192 Chennai',
+    origin: { lat: 12.9716, lng: 77.5946 },
+    dest: { lat: 13.0827, lng: 80.2707 },
+  },
 ]
 
 export default function JourneyForm({
