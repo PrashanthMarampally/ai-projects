@@ -25,6 +25,15 @@ public class JourneyEvaluator {
     private static final double REFERENCE_CHARGER_KW = 150.0;
 
     /**
+     * Journey duration used to normalise the absolute-time component of
+     * the time-efficiency score.  A trip that completes in this many minutes
+     * scores zero on duration; shorter trips score proportionally higher.
+     * 480 minutes (8 hours) covers the longest realistic same-day intercity
+     * drive in India.
+     */
+    private static final double REFERENCE_JOURNEY_MINUTES = 480.0;
+
+    /**
      * Maximum number of stops the planner will ever produce; used to
      * normalise the stop-count penalty in the experience dimension.
      */
@@ -77,32 +86,36 @@ public class JourneyEvaluator {
     // -------------------------------------------------------------------------
 
     /**
-     * Ratio of pure drive time to total journey time (drive + charging +
-     * detour to reach charging stations).  A route that needs no charging
-     * scores 100.  The penalty grows with charging minutes and detour distance.
+     * Blends two sub-scores, each 0–100:
+     *
+     * <p><b>Overhead ratio (60 %):</b> drive time divided by user-visible
+     * total (drive + charging).  Detour is intentionally excluded here — it
+     * is already penalised by the charging-experience dimension, so including
+     * it here would double-count it.
+     *
+     * <p><b>Absolute duration (40 %):</b> how the total trip time compares to
+     * {@link #REFERENCE_JOURNEY_MINUTES}.  Shorter journeys score higher,
+     * rewarding routes that complete the trip faster in absolute terms.
      */
     private BigDecimal scoreTimeEfficiency(
             RouteResult route,
             MultiStopChargingPlan plan) {
 
-        if (plan == null || plan.chargingStops().isEmpty()) {
-            return BigDecimal.valueOf(100);
-        }
-
         double driveMinutes    = route.durationMinutes();
-        double chargingMinutes = plan.totalChargingMinutes().doubleValue();
-
-        // Convert detour kilometres to minutes using the route's average speed.
-        double distanceKm   = route.distanceKm().doubleValue();
-        double avgSpeedKmh  = driveMinutes > 0 ? distanceKm / (driveMinutes / 60.0) : 60.0;
-        double detourMinutes = avgSpeedKmh > 0
-                ? plan.totalDetourKm().doubleValue() / avgSpeedKmh * 60.0
+        double chargingMinutes = plan != null && !plan.chargingStops().isEmpty()
+                ? plan.totalChargingMinutes().doubleValue()
                 : 0.0;
 
-        double totalMinutes = driveMinutes + chargingMinutes + detourMinutes;
-        double ratio = totalMinutes > 0 ? driveMinutes / totalMinutes : 1.0;
+        double userTotalMinutes = driveMinutes + chargingMinutes;
 
-        return BigDecimal.valueOf(Math.min(100.0, ratio * 100.0));
+        double ratioScore = userTotalMinutes > 0
+                ? driveMinutes / userTotalMinutes * 100.0
+                : 100.0;
+
+        double durationScore = Math.max(0.0,
+                1.0 - userTotalMinutes / REFERENCE_JOURNEY_MINUTES) * 100.0;
+
+        return BigDecimal.valueOf(Math.min(100.0, 0.6 * ratioScore + 0.4 * durationScore));
     }
 
     // -------------------------------------------------------------------------

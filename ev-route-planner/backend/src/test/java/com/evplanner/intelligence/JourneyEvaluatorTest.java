@@ -41,16 +41,47 @@ class JourneyEvaluatorTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void noChargingRouteScoresFullTimeEfficiency() {
-        RouteResult route = new RouteResult(
+    void noChargingRouteScoresHigherTimeEfficiencyThanChargingRoute() {
+        // No-charging route: all drive time, no overhead
+        RouteResult shortRoute = new RouteResult(
                 BigDecimal.valueOf(200), 180, List.of());
         JourneyRequest request = requestWithMinSoc(15);
 
-        JourneyScore score = evaluator.evaluate(route, request, null,
+        JourneyScore noCharge = evaluator.evaluate(shortRoute, request, null,
                 BigDecimal.valueOf(55));
 
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(score.timeEfficiency()),
-                "No charging → time efficiency must be 100");
+        // Charging route with the same drive time + 45 min charging
+        ChargingStopPlan stop = makeStop(1L, "Stop", 150);
+        MultiStopChargingPlan plan = new MultiStopChargingPlan(
+                List.of(stop), BigDecimal.valueOf(45), BigDecimal.ZERO);
+        RouteResult sameRoute = new RouteResult(
+                BigDecimal.valueOf(200), 180, List.of());
+
+        JourneyScore withCharge = evaluator.evaluate(sameRoute, request, plan,
+                BigDecimal.valueOf(30));
+
+        assertTrue(
+                noCharge.timeEfficiency().compareTo(withCharge.timeEfficiency()) > 0,
+                "No charging → better time efficiency than same route with charging");
+    }
+
+    @Test
+    void shorterTripScoresHigherTimeEfficiencyThanLongerTrip() {
+        JourneyRequest request = requestWithMinSoc(15);
+
+        RouteResult fastRoute = new RouteResult(
+                BigDecimal.valueOf(200), 180, List.of());
+        RouteResult slowRoute = new RouteResult(
+                BigDecimal.valueOf(300), 360, List.of());
+
+        JourneyScore fast = evaluator.evaluate(fastRoute, request, null,
+                BigDecimal.valueOf(60));
+        JourneyScore slow = evaluator.evaluate(slowRoute, request, null,
+                BigDecimal.valueOf(40));
+
+        assertTrue(
+                fast.timeEfficiency().compareTo(slow.timeEfficiency()) > 0,
+                "Shorter/faster trip → better time efficiency");
     }
 
     @Test
